@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz FLE A1.1 – Articles contractés & Faire / Jouer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #f5f4f0; color: #1a1a18;
+      min-height: 100vh; display: flex;
+      align-items: flex-start; justify-content: center;
+      padding: 2rem 1rem 3rem;
+    }
+    .quiz-wrap { width: 100%; max-width: 640px; }
+
+    .header { text-align: center; margin-bottom: 1.8rem; }
+    .badge {
+      display: inline-block; background: #E1F5EE; color: #085041;
+      font-size: 12px; font-weight: 600; padding: 4px 16px;
+      border-radius: 20px; margin-bottom: 10px; letter-spacing: 0.03em;
+    }
+    .title { font-size: 22px; font-weight: 700; color: #1a1a18; margin-bottom: 5px; }
+    .subtitle { font-size: 13px; color: #5a5a56; line-height: 1.6; }
+
+    .part-strip { display: flex; gap: 8px; margin-bottom: 1.2rem; }
+    .part-pill {
+      flex: 1; text-align: center; padding: 8px 10px;
+      border-radius: 10px; font-size: 13px; font-weight: 600;
+      border: 1.5px solid rgba(0,0,0,0.1);
+      background: #fff; color: #888780; transition: all 0.3s; line-height: 1.4;
+    }
+    .part-pill.active { background: #1D9E75; color: #fff; border-color: #1D9E75; }
+    .part-pill.done   { background: #E1F5EE; color: #085041; border-color: #1D9E75; }
+
+    .progress-bar-wrap { background: #e0dfd8; border-radius: 20px; height: 7px; margin-bottom: 6px; }
+    .progress-bar { background: #1D9E75; height: 7px; border-radius: 20px; transition: width 0.4s ease; }
+    .progress-label { font-size: 12px; color: #888780; text-align: right; margin-bottom: 1.3rem; }
+
+    .question-card {
+      background: #fff; border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 16px; padding: 1.6rem 1.5rem 1.4rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .part-label { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #b4b2a9; margin-bottom: 8px; }
+    .context-tag {
+      display: inline-block; font-size: 12px; font-weight: 600;
+      border-radius: 20px; padding: 4px 14px; margin-bottom: 12px;
+    }
+    .context-tag.sport   { background: #E1F5EE; color: #085041; }
+    .context-tag.culture { background: #EEEDFE; color: #3C3489; }
+    .hint {
+      font-size: 13px; color: #5a5a56; background: #f5f4f0;
+      border-radius: 8px; padding: 8px 12px; margin-bottom: 14px; line-height: 1.5;
+    }
+    .question-text { font-size: 17px; font-weight: 600; color: #1a1a18; line-height: 1.6; margin-bottom: 1.3rem; }
+    .blank { display: inline-block; border-bottom: 2.5px solid #1D9E75; min-width: 72px; text-align: center; color: #1D9E75; font-weight: 700; }
+
+    .choices { display: flex; flex-direction: column; gap: 10px; }
+    .choice-btn {
+      background: #fff; border: 1.5px solid rgba(0,0,0,0.15);
+      border-radius: 10px; padding: 13px 16px; font-size: 15px;
+      font-family: inherit; color: #1a1a18; cursor: pointer;
+      text-align: left; transition: background 0.15s, border-color 0.15s; font-weight: 500;
+    }
+    .choice-btn:hover:not(:disabled) { background: #E1F5EE; border-color: #5DCAA5; }
+    .choice-btn:disabled { cursor: default; }
+    .choice-btn.correct { background: #E1F5EE; border-color: #1D9E75; color: #085041; font-weight: 600; }
+    .choice-btn.wrong   { background: #FCEBEB; border-color: #E24B4A; color: #501313; }
+    .choice-btn.reveal  { background: #E1F5EE; border-color: #1D9E75; color: #085041; font-weight: 600; }
+
+    .feedback { margin-top: 1.1rem; padding: 14px 16px; border-radius: 10px; font-size: 14px; line-height: 1.7; }
+    .feedback.correct { background: #E1F5EE; border: 1px solid #1D9E75; color: #085041; }
+    .feedback.wrong   { background: #FCEBEB; border: 1px solid #E24B4A; color: #501313; }
+    .feedback-rule { display: block; margin-top: 8px; padding: 8px 12px; background: rgba(255,255,255,0.6); border-radius: 7px; font-size: 13px; }
+
+    .next-btn {
+      display: block; width: 100%; margin-top: 1.1rem; padding: 13px;
+      background: #1D9E75; color: #fff; border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; transition: opacity 0.15s;
+    }
+    .next-btn:hover { opacity: 0.88; }
+
+    .part-transition {
+      background: #fff; border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 16px; padding: 2.4rem 1.8rem; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .part-transition .big-emoji { font-size: 46px; margin-bottom: 14px; }
+    .part-transition h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .part-transition p { font-size: 14px; color: #5a5a56; line-height: 1.6; margin-bottom: 1.2rem; }
+    .mini-score { display: inline-block; background: #E1F5EE; color: #085041; font-weight: 700; font-size: 24px; padding: 10px 28px; border-radius: 10px; margin-bottom: 1.4rem; }
+    .continue-btn {
+      display: inline-block; padding: 13px 36px;
+      background: #533AB7; color: #fff; border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer;
+    }
+    .continue-btn:hover { opacity: 0.88; }
+
+    .score-card {
+      background: #fff; border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 16px; padding: 2.6rem 1.8rem; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .emoji-score { font-size: 46px; margin-bottom: 14px; }
+    .score-big { font-size: 54px; font-weight: 700; color: #533AB7; line-height: 1; }
+    .score-label { font-size: 14px; color: #888780; margin: 6px 0 1.2rem; }
+    .score-msg { font-size: 18px; font-weight: 700; color: #1a1a18; margin-bottom: 6px; }
+    .score-sub { font-size: 14px; color: #5a5a56; margin-bottom: 1.6rem; line-height: 1.6; }
+    .score-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-bottom: 1.6rem; }
+    .score-stat { background: #f5f4f0; border-radius: 10px; padding: 14px 10px; }
+    .score-stat-num { font-size: 22px; font-weight: 700; }
+    .score-stat-num.good   { color: #1D9E75; }
+    .score-stat-num.bad    { color: #E24B4A; }
+    .score-stat-num.purple { color: #533AB7; }
+    .score-stat-lbl { font-size: 12px; color: #888780; margin-top: 3px; }
+    .restart-btn {
+      display: inline-block; padding: 13px 36px;
+      background: #1D9E75; color: #fff; border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer;
+    }
+    .restart-btn:hover { opacity: 0.88; }
+    .footer { text-align: center; margin-top: 2rem; font-size: 12px; color: #b4b2a9; }
+
+    @media (max-width: 480px) {
+      .question-text { font-size: 15px; }
+      .choice-btn { font-size: 14px; padding: 11px 14px; }
+      .score-big { font-size: 42px; }
+      .part-pill { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+<div class="quiz-wrap">
+  <div class="header">
+    <div class="badge">Niveau A1.1 · FLE</div>
+    <h1 class="title">Articles contractés &amp; Verbes d'activité</h1>
+    <p class="subtitle"><strong>Partie 1</strong> — Articles contractés : <em>du, de la, de l'</em><br><strong>Partie 2</strong> — Verbes <em>faire</em> et <em>jouer</em> dans les activités</p>
+  </div>
+  <div class="part-strip">
+    <div class="part-pill active" id="pill-1">📘 Partie 1<br><small style="font-weight:500;font-size:11px">Articles contractés</small></div>
+    <div class="part-pill" id="pill-2">📗 Partie 2<br><small style="font-weight:500;font-size:11px">Faire &amp; Jouer</small></div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+  <div class="progress-label" id="progress-label">Question 1 / 30</div>
+  <div id="quiz-area"></div>
+  <p class="footer">Quiz FLE · Classe A1.1 · Articles contractés &amp; Faire / Jouer · 30 questions</p>
+</div>
+<script>
+const P1=[
+  {context:"⚽ Football",type:"sport",pl:"Partie 1 — Articles contractés",hint:"💡 Masculin singulier : <em>de + le = <strong>du</strong></em>",
+   text:"Il joue _____ football tous les samedis.",choices:["de la","du","de l'","de"],correct:1,
+   expl:"<strong>Football</strong> est masculin singulier → <strong>du</strong> (de + le).",
+   rule:"📌 <em>de + le → du</em> (masc.) &nbsp;|&nbsp; <em>de + la → de la</em> (fém.) &nbsp;|&nbsp; <em>de + l' → de l'</em> (voyelle)"},
+  {context:"🎻 Violon",type:"culture",pl:"Partie 1 — Articles contractés",hint:"💡 Masculin singulier : <em>de + le = <strong>du</strong></em>",
+   text:"Sophie fait _____ violon depuis trois ans.",choices:["du","de la","de l'","des"],correct:0,
+   expl:"<strong>Violon</strong> est masculin → <strong>du</strong>.",
+   rule:"📌 <em>faire du violon</em> — violon = masc. → <em>du</em>."},
+  {context:"🩰 Danse",type:"culture",pl:"Partie 1 — Articles contractés",hint:"💡 Féminin singulier : <em>de + la = <strong>de la</strong></em>",
+   text:"Elle fait _____ danse classique le mercredi.",choices:["du","de l'","de la","des"],correct:2,
+   expl:"<strong>Danse</strong> est féminin → <strong>de la</strong>.",
+   rule:"📌 <em>de + la → de la</em> devant un nom féminin commençant par une consonne."},
+  {context:"🧗 Escalade",type:"sport",pl:"Partie 1 — Articles contractés",hint:"💡 Devant une voyelle : <strong>de l'</strong>",
+   text:"Lucas fait _____ escalade le week-end.",choices:["du","de la","de l'","de"],correct:2,
+   expl:"<strong>Escalade</strong> commence par 'e' (voyelle) → <strong>de l'</strong>.",
+   rule:"📌 Devant une voyelle ou h muet : <em>de l'</em> (masc. ou fém.)."},
+  {context:"🥁 Batterie",type:"culture",pl:"Partie 1 — Articles contractés",hint:"💡 Féminin singulier : <strong>de la</strong>",
+   text:"Mon frère joue _____ batterie dans un groupe.",choices:["du","de la","de l'","des"],correct:1,
+   expl:"<strong>Batterie</strong> est féminin → <strong>de la</strong>.",
+   rule:"📌 <em>jouer de la batterie</em> — batterie = fém. → <em>de la</em>."},
+  {context:"🏀 Basketball",type:"sport",pl:"Partie 1 — Articles contractés",hint:"💡 Masculin singulier : <strong>du</strong>",
+   text:"Nous faisons _____ basketball après l'école.",choices:["de la","de l'","du","des"],correct:2,
+   expl:"<strong>Basketball</strong> est masculin → <strong>du</strong>.",
+   rule:"📌 <em>faire du basketball</em> — basketball = masc. → <em>du</em>."},
+  {context:"🎹 Piano",type:"culture",pl:"Partie 1 — Articles contractés",hint:"💡 Masculin singulier : <strong>du</strong>",
+   text:"Léa apprend à jouer _____ piano.",choices:["de la","du","de l'","de"],correct:1,
+   expl:"<strong>Piano</strong> est masculin → <strong>du</strong>.",
+   rule:"📌 <em>jouer du piano</em> — piano = masc. → <em>du</em>."},
+  {context:"🤸 Gym",type:"sport",pl:"Partie 1 — Articles contractés",hint:"💡 Devant une voyelle : <strong>de l'</strong>",
+   text:"Elle fait _____ athlétisme au club sportif.",choices:["du","de la","de l'","des"],correct:2,
+   expl:"<strong>Athlétisme</strong> commence par 'a' (voyelle) → <strong>de l'</strong>.",
+   rule:"📌 <em>de l'athlétisme</em> — commence par 'a' → <em>de l'</em>."},
+  {context:"🎸 Guitare",type:"culture",pl:"Partie 1 — Articles contractés",hint:"💡 Féminin singulier : <strong>de la</strong>",
+   text:"Tom joue _____ guitare électrique.",choices:["du","de la","de l'","des"],correct:1,
+   expl:"<strong>Guitare</strong> est féminin → <strong>de la</strong>.",
+   rule:"📌 <em>jouer de la guitare</em> — guitare = fém. → <em>de la</em>."},
+  {context:"⛷️ Ski",type:"sport",pl:"Partie 1 — Articles contractés",hint:"💡 Masculin singulier : <strong>du</strong>",
+   text:"En hiver, toute la famille fait _____ ski.",choices:["de la","du","de l'","de"],correct:1,
+   expl:"<strong>Ski</strong> est masculin → <strong>du</strong>.",
+   rule:"📌 <em>faire du ski</em> — ski = masc. → <em>du</em>."},
+  {context:"🎨 Peinture",type:"culture",pl:"Partie 1 — Articles contractés",hint:"💡 Féminin singulier : <strong>de la</strong>",
+   text:"Les élèves font _____ peinture le vendredi.",choices:["du","de l'","de la","des"],correct:2,
+   expl:"<strong>Peinture</strong> est féminin → <strong>de la</strong>.",
+   rule:"📌 <em>faire de la peinture</em> — peinture = fém. → <em>de la</em>."},
+  {context:"🎵 Harmonica",type:"culture",pl:"Partie 1 — Articles contractés",hint:"💡 Devant 'h' muet + voyelle : <strong>de l'</strong>",
+   text:"Il fait _____ harmonica dans un groupe de jazz.",choices:["du","de la","de l'","des"],correct:2,
+   expl:"<strong>Harmonica</strong> commence par 'h' muet suivi de 'a' → <strong>de l'</strong>.",
+   rule:"📌 Devant h muet + voyelle : <em>de l'harmonica</em>."},
+  {context:"🏇 Équitation",type:"sport",pl:"Partie 1 — Articles contractés",hint:"💡 Devant une voyelle : <strong>de l'</strong>",
+   text:"Ma cousine fait _____ équitation deux fois par semaine.",choices:["du","de la","de l'","des"],correct:2,
+   expl:"<strong>Équitation</strong> commence par 'é' (voyelle) → <strong>de l'</strong>.",
+   rule:"📌 <em>faire de l'équitation</em> — commence par 'é' → <em>de l'</em>."},
+  {context:"🥊 Boxe",type:"sport",pl:"Partie 1 — Articles contractés",hint:"💡 Féminin singulier : <strong>de la</strong>",
+   text:"Il s'entraîne et fait _____ boxe tous les jours.",choices:["du","de la","de l'","des"],correct:1,
+   expl:"<strong>Boxe</strong> est féminin → <strong>de la</strong>.",
+   rule:"📌 <em>faire de la boxe</em> — boxe = fém. → <em>de la</em>."},
+  {context:"🎷 Saxophone",type:"culture",pl:"Partie 1 — Articles contractés",hint:"💡 Masculin singulier : <strong>du</strong>",
+   text:"Cet enfant joue _____ saxophone à l'école de musique.",choices:["de la","du","de l'","des"],correct:1,
+   expl:"<strong>Saxophone</strong> est masculin → <strong>du</strong>.",
+   rule:"📌 <em>jouer du saxophone</em> — saxophone = masc. → <em>du</em>."}
+];
+
+const P2=[
+  {context:"⚽ Football",type:"sport",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 <strong>Jouer à</strong> = sports collectifs &nbsp;|&nbsp; <strong>Faire de</strong> = sports individuels et arts",
+   text:"Les enfants _____ au football dans le parc.",choices:["font","jouent","jouons","faites"],correct:1,
+   expl:"On dit <strong>jouer à</strong> pour les sports collectifs : <em>ils jouent au football</em>.",
+   rule:"📌 <em>jouer à + sport collectif</em> : jouer au football, au tennis, au volleyball."},
+  {context:"🎵 Musique",type:"culture",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 <strong>Faire de la / du / de l'</strong> = activité artistique ou sportive individuelle",
+   text:"Elle _____ de la musique dans une école spécialisée.",choices:["joue","fais","fait","faisons"],correct:2,
+   expl:"<strong>Faire de la musique</strong> = pratiquer la musique. Avec <em>elle</em> → <em>fait</em>.",
+   rule:"📌 <em>faire de la musique</em> — activité artistique → <em>faire + de la</em>."},
+  {context:"🎹 Piano",type:"culture",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 Pour les instruments de musique : <strong>jouer de / du / de la</strong>",
+   text:"Mon père _____ du piano le soir après le travail.",choices:["fait","joue","joues","jouez"],correct:1,
+   expl:"Pour les instruments : <strong>jouer de + article</strong> → <em>jouer du piano</em>. Avec <em>il</em> → <em>joue</em>.",
+   rule:"📌 <em>jouer du piano / de la guitare / du violon</em> — toujours <em>jouer de</em> pour un instrument."},
+  {context:"🏊 Natation",type:"sport",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 <strong>Faire de la / du / de l'</strong> pour les sports individuels",
+   text:"Nous _____ de la natation à la piscine municipale.",choices:["jouons","faisons","faites","fait"],correct:1,
+   expl:"<strong>Faire de la natation</strong> = sport individuel. Avec <em>nous</em> → <em>faisons</em>.",
+   rule:"📌 <em>faire de la natation / du ski / du vélo</em> — sports individuels → <em>faire</em>."},
+  {context:"🎾 Tennis",type:"sport",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 <strong>Jouer au tennis</strong> — sport de compétition avec raquette",
+   text:"Tu _____ au tennis avec ton ami chaque mardi ?",choices:["fais","joues","jouez","fait"],correct:1,
+   expl:"On dit <strong>jouer au tennis</strong>. Avec <em>tu</em> → <em>joues</em>.",
+   rule:"📌 <em>jouer au + sport</em> : jouer au tennis, au rugby, au ping-pong."},
+  {context:"🚴 Vélo",type:"sport",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 <strong>Faire du vélo</strong> — activité physique individuelle",
+   text:"Vous _____ du vélo le dimanche matin ?",choices:["jouez","faites","fait","fais"],correct:1,
+   expl:"<strong>Faire du vélo</strong> = activité individuelle. Avec <em>vous</em> → <em>faites</em>.",
+   rule:"📌 <em>faire du vélo</em> → verbe <em>faire</em>."},
+  {context:"🎭 Théâtre",type:"culture",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 <em>Jouer dans</em> une pièce = interpréter un rôle",
+   text:"Les lycéens _____ dans une pièce de théâtre cette année.",choices:["font","jouent","joue","faisons"],correct:1,
+   expl:"<strong>Jouer dans une pièce</strong> = interpréter un rôle. Avec <em>ils</em> → <em>jouent</em>.",
+   rule:"📌 <em>jouer dans une pièce / jouer un rôle</em> → verbe <em>jouer</em>."},
+  {context:"🤸 Gym",type:"sport",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 Gymnastique = sport individuel → <strong>faire de la</strong>",
+   text:"Marie _____ de la gymnastique depuis l'âge de cinq ans.",choices:["joue","jouons","fait","faites"],correct:2,
+   expl:"<strong>Faire de la gymnastique</strong> = sport individuel. Avec <em>elle</em> → <em>fait</em>.",
+   rule:"📌 <em>faire de la gymnastique</em> → <em>faire</em>."},
+  {context:"🏀 Basketball",type:"sport",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 Basketball = sport collectif → <strong>jouer au</strong>",
+   text:"Mon équipe _____ au basketball tous les vendredis.",choices:["fait","joue","jouez","faisons"],correct:1,
+   expl:"<strong>Jouer au basketball</strong> = sport collectif. Avec <em>elle (équipe)</em> → <em>joue</em>.",
+   rule:"📌 <em>jouer au basketball</em> — sport d'équipe → <em>jouer à</em>."},
+  {context:"🎨 Dessin",type:"culture",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 Dessin = activité artistique → <strong>faire du</strong>",
+   text:"Je _____ du dessin dans un atelier le samedi.",choices:["joue","fais","fait","jouons"],correct:1,
+   expl:"<strong>Faire du dessin</strong> = activité artistique. Avec <em>je</em> → <em>fais</em>.",
+   rule:"📌 <em>faire du dessin / de la peinture / de la sculpture</em> → <em>faire</em>."},
+  {context:"🥁 Batterie",type:"culture",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 Instrument de musique → <strong>jouer de la</strong>",
+   text:"Il _____ de la batterie dans un groupe de rock.",choices:["fait","joue","jouons","faites"],correct:1,
+   expl:"<strong>Jouer de la batterie</strong> = instrument (féminin). Avec <em>il</em> → <em>joue</em>.",
+   rule:"📌 <em>jouer de la batterie</em> — instrument → <em>jouer de</em>."},
+  {context:"⛷️ Ski",type:"sport",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 Ski = sport de glisse individuel → <strong>faire du</strong>",
+   text:"Ils _____ du ski dans les Alpes chaque hiver.",choices:["jouent","font","faites","fais"],correct:1,
+   expl:"<strong>Faire du ski</strong> = sport individuel de glisse. Avec <em>ils</em> → <em>font</em>.",
+   rule:"📌 <em>faire du ski / du snowboard / du surf</em> → <em>faire</em>."},
+  {context:"🎸 Guitare",type:"culture",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 Instrument de musique → <strong>jouer de la</strong>",
+   text:"Tu _____ de la guitare depuis combien de temps ?",choices:["fais","joues","jouez","fait"],correct:1,
+   expl:"<strong>Jouer de la guitare</strong> = instrument (féminin). Avec <em>tu</em> → <em>joues</em>.",
+   rule:"📌 <em>jouer de la guitare</em> — guitare = fém. → <em>jouer de la</em>."},
+  {context:"🥋 Judo",type:"sport",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 Arts martiaux = sports individuels → <strong>faire du</strong>",
+   text:"Nous _____ du judo au club municipal.",choices:["jouons","faisons","jouez","faites"],correct:1,
+   expl:"<strong>Faire du judo</strong> = sport de combat individuel. Avec <em>nous</em> → <em>faisons</em>.",
+   rule:"📌 <em>faire du judo / du karaté / de la boxe</em> — arts martiaux → <em>faire</em>."},
+  {context:"🎻 Violon",type:"culture",pl:"Partie 2 — Faire ou Jouer ?",hint:"💡 Instrument de musique → <strong>jouer du</strong>",
+   text:"La petite fille _____ du violon avec beaucoup de talent.",choices:["fait","joue","jouons","faites"],correct:1,
+   expl:"<strong>Jouer du violon</strong> = instrument (masculin). Avec <em>elle</em> → <em>joue</em>.",
+   rule:"📌 Résumé : <em>instruments</em> → <em>jouer de</em> &nbsp;|&nbsp; <em>activités</em> → <em>faire de</em>."}
+];
+
+const ALL=[...P1,...P2];
+const P1SIZE=15;
+let cur=0,score=0,p1score=0,ok=0,ko=0,answered=false,transition=false;
+
+function pills(){
+  document.getElementById('pill-1').className='part-pill '+(cur<P1SIZE?'active':'done');
+  document.getElementById('pill-2').className='part-pill '+(cur<P1SIZE?'':(transition?'active':'active'));
+  if(cur>=ALL.length){
+    document.getElementById('pill-1').className='part-pill done';
+    document.getElementById('pill-2').className='part-pill done';
+  }
+}
+
+function render(){
+  const area=document.getElementById('quiz-area');
+  const bar=document.getElementById('progress-bar');
+  const lbl=document.getElementById('progress-label');
+
+  if(cur>=ALL.length){
+    bar.style.width='100%'; lbl.textContent='Quiz terminé !'; pills();
+    const pct=Math.round((score/ALL.length)*100);
+    const p2=score-p1score;
+    let emoji='😊',msg='Bon travail !',sub='Continue à pratiquer !';
+    if(pct>=90){emoji='🏆';msg='Excellent ! Bravo !';sub='Tu maîtrises parfaitement les articles contractés et les verbes faire et jouer !';}
+    else if(pct>=70){emoji='😊';msg='Très bien !';sub='Encore quelques révisions et tu seras parfait(e).';}
+    else if(pct>=50){emoji='🙂';msg='Pas mal !';sub='Relis les règles et réessaie — tu peux faire mieux !';}
+    else{emoji='📖';msg="Continue d'apprendre !";sub='Révise les articles (du/de la/de l\') et les constructions faire de / jouer à.';}
+    area.innerHTML=`<div class="score-card">
+      <div class="emoji-score">${emoji}</div>
+      <div class="score-big">${score}/30</div>
+      <div class="score-label">Score final : ${pct}%</div>
+      <div class="score-msg">${msg}</div>
+      <div class="score-sub">${sub}</div>
+      <div class="score-grid">
+        <div class="score-stat"><div class="score-stat-num purple">${p1score}/15</div><div class="score-stat-lbl">📘 Partie 1</div></div>
+        <div class="score-stat"><div class="score-stat-num purple">${p2}/15</div><div class="score-stat-lbl">📗 Partie 2</div></div>
+        <div class="score-stat"><div class="score-stat-num good">${ok}</div><div class="score-stat-lbl">✔ Correctes</div></div>
+        <div class="score-stat"><div class="score-stat-num bad">${ko}</div><div class="score-stat-lbl">✖ Incorrectes</div></div>
+      </div>
+      <button class="restart-btn" onclick="restart()">↺ Recommencer le quiz</button>
+    </div>`; return;
+  }
+
+  if(transition){
+    bar.style.width='50%'; lbl.textContent='Partie 2 / 2';
+    document.getElementById('pill-1').className='part-pill done';
+    document.getElementById('pill-2').className='part-pill active';
+    area.innerHTML=`<div class="part-transition">
+      <div class="big-emoji">🎉</div>
+      <h2>Partie 1 terminée !</h2>
+      <p>Articles contractés <em>du / de la / de l'</em><br>Tu as obtenu :</p>
+      <div class="mini-score">${p1score} / 15</div>
+      <p>Maintenant, place à la <strong>Partie 2</strong> :<br>les verbes <em>faire</em> et <em>jouer</em>.</p>
+      <button class="continue-btn" onclick="go2()">Commencer la Partie 2 →</button>
+    </div>`; return;
+  }
+
+  bar.style.width=((cur/ALL.length)*100)+'%';
+  lbl.textContent='Question '+(cur+1)+' / 30'; pills();
+  const q=ALL[cur]; answered=false;
+  const ch=q.choices.map((c,i)=>`<button class="choice-btn" id="c${i}" onclick="pick(${i})">${c}</button>`).join('');
+  area.innerHTML=`<div class="question-card">
+    <div class="part-label">${q.pl}</div>
+    <div class="context-tag ${q.type}">${q.context}</div>
+    <div class="hint">${q.hint}</div>
+    <div class="question-text">${q.text.replace('_____','<span class="blank">_____</span>')}</div>
+    <div class="choices">${ch}</div>
+    <div id="feedback"></div>
+  </div>`;
+}
+
+function pick(idx){
+  if(answered)return; answered=true;
+  const q=ALL[cur];
+  document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);
+  const right=idx===q.correct;
+  if(right){score++;ok++;if(cur<P1SIZE)p1score++;}else{ko++;}
+  document.getElementById('c'+idx).classList.add(right?'correct':'wrong');
+  if(!right)document.getElementById('c'+q.correct).classList.add('reveal');
+  const fb=document.getElementById('feedback');
+  fb.className='feedback '+(right?'correct':'wrong');
+  const intro=right?'<strong>Bravo !</strong> ':'<strong>Pas tout à fait.</strong> La bonne réponse est <strong>'+q.choices[q.correct]+'</strong>. ';
+  const icon=right?'✔ ':'✖ ';
+  const isLast=cur===ALL.length-1;
+  const isEndP1=cur===P1SIZE-1;
+  const nextLbl=isLast?'Voir mon score final →':(isEndP1?'Voir le résultat Partie 1 →':'Question suivante →');
+  fb.innerHTML=`${icon}${intro}${q.expl}<span class="feedback-rule">${q.rule}</span><button class="next-btn" onclick="nxt()">${nextLbl}</button>`;
+}
+
+function nxt(){
+  cur++;
+  if(cur===P1SIZE){transition=true;}
+  render();
+}
+function go2(){transition=false;render();}
+function restart(){cur=0;score=0;p1score=0;ok=0;ko=0;answered=false;transition=false;render();}
+render();
+</script>
+</body>
+</html>
